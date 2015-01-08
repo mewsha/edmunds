@@ -68,7 +68,7 @@ class edmunds(object):
 		for model in models:
 			name = model['name']
 			years = model['years']
-			print "\t%s was created for %d year(s)" % (name, len(years))
+			print "\t%s created for %d year(s)" % (name, len(years))
 			for year in years:
 				print "\t\t(%d) %d" % (year['id'], year['year'])
 	    
