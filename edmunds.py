@@ -56,20 +56,6 @@ class edmunds(object):
         return self.requestInformation(query)
 
 
-    def printModelInfoDump(self, carDict):
-        """dumps model information, not pretty"""
-        for key,value in carDict.iteritems():
-            if (key == 'styles'):
-                for style in value:
-                    for skey, sval in style.iteritems():
-                        if(skey == 'submodel'):
-                            print skey, sval['body']
-                        else:
-                            print skey, sval
-            else:    
-                print key,value
-
-
     def printMakeInfo(self, makeDict):
         """Prints formatted model information"""
         idNum = makeDict['id']
@@ -115,21 +101,7 @@ class edmunds(object):
 
         try: stats['valvCyl'] = stats['totalValves']/stats['cylinder']
         except (TypeError): stats['valvCyl']='N/A'
-        #idNum = engine['id']
-        #code = engine['code']        
-        #name = engine['name']
-        #eType = engine['equipmentType']
-        #size = engine['size']
-        #conf = engine['configuration']
-        #fuelType = engine['fuelType']
-        #hp = engine['horsepower']
-        #torq = engine['torque']
-        #valv = engine['totalValves']/engine['cylinder']
-        #energy = engine['type']
-        #cType = engine['compressorType']
-        #cyl = engine['cylinder']
-        #disp = engine['displacement']
-        #ratio = engine['compressionRatio']
+
         print ("({idNum})  STANDARD  {energy}({fuel}) {name}  "
                 "{config}{cyl}  {size}L({disp}kL)").format(idNum=stats['id'], \
                 energy=stats['type'], fuel=stats['fuelType'], \
@@ -141,6 +113,7 @@ class edmunds(object):
                 "{torq} pound/sqinch").format(hp=stats['horsepower'], \
             valvCyl=stats['valvCyl'], torq=stats['torque'])
 
+
     def returnStandardEngine(self,enginesDict):
         engines = enginesDict["engines"]
         for engine in engines:
@@ -148,6 +121,7 @@ class edmunds(object):
             if(avail=="STANDARD"):
                 return engine
         return None
+
 
     def printEngineInfo(self, enginesDict):
         """Prints Standard package information, engine info"""
@@ -160,9 +134,12 @@ class edmunds(object):
             print "Exception when printing engine information"
             print type(e), e
 
+
     def printEnginesSideBySide(self, engine1Dict, engine2Dict):
         """Prints two engine's information side by side for comparison"""
         try:
+
+            
             engine1 = self.returnStandardEngine(engine1Dict)
             if (engine1 is None):
                 raise RuntimeError("No standard engine for style 1")
@@ -176,16 +153,17 @@ class edmunds(object):
             catDict = {}
 
             for stat in categories:
-                print stat
-                try: e1 = engine1[stat]
+                try: e1 = str(engine1[stat])
                 except (KeyError): e1 = 'unlisted'
-                try: e2 = engine2[stat]
+                try: e2 = str(engine2[stat])
                 except (KeyError): e2 = 'unlisted'
-                print stat, e1, e2
                 catDict[stat] = (e1, e2)
-
+            underline = "\033[4m"
+            noformat = "\033[0m"
+            print "{0}Comparsion{1}".format(underline, noformat).center(60)
+            print "{0:20s}{1:20s}{2}".format(" ", "Engine 1", "Engine 2")
             for label, value in catDict.iteritems():
-                print "{0:20d}{1:20d}{2}".format(label.upper(), value[0], value[1]) 
+                print "{0:20s}{1:20s}{2}".format(label.upper(), value[0], value[1]) 
 
         except (RuntimeError, Exception) as e:
             print "Exception when printing engine information"
