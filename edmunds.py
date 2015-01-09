@@ -103,11 +103,11 @@ class edmunds(object):
         except (TypeError): stats['valvCyl']='N/A'
 
         print ("({idNum})  STANDARD  {energy}({fuel}) {name}  "
-                "{config}{cyl}  {size}L({disp}kL)").format(idNum=stats['id'], \
-                energy=stats['type'], fuel=stats['fuelType'], \
-                name=stats['name'], config=stats['configuration'], \
-                cyl=stats['cylinder'], size=stats['size'], \
-                disp=stats['displacement'])
+                "{config}{cyl}  {size}L({disp}kL)").format(\
+                idNum=stats['id'], energy=stats['type'], \
+                fuel=stats['fuelType'], name=stats['name'], \
+                config=stats['configuration'], cyl=stats['cylinder'],\
+                size=stats['size'], disp=stats['displacement'])
 
         print ("{hp} hp  {valvCyl} valve/cyl  "
                 "{torq} pound/sqinch").format(hp=stats['horsepower'], \
@@ -135,39 +135,52 @@ class edmunds(object):
             print type(e), e
 
 
-    def printEnginesSideBySide(self, engine1Dict, engine2Dict):
-        """Prints two engine's information side by side for comparison"""
+    def printEnginesSideBySide(self, *packagesDicts):
+        """Prints two engine's information side by side"""
         try:
-
-            
-            engine1 = self.returnStandardEngine(engine1Dict)
-            if (engine1 is None):
-                raise RuntimeError("No standard engine for style 1")
-            engine2 = self.returnStandardEngine(engine2Dict)
-            if (engine2 is None):
-                raise RuntimeError("No standard engine for style 2")
+            engines = []
+            for i in range(0,len(packagesDicts)):
+                engine = self.returnStandardEngine(packagesDicts[i])
+                if (engine is None):
+                    print ("No engine information found for engine "
+                            "{0}").format(i+1)
+                    engine = {'car':'notFound '+i}
+                engines.append(engine)
+            print engines
 
             categories = ['id', 'type', 'fuelType', 'configuration',\
                 'cylinder', 'size', 'displacement', 'horsepower', \
                 'totalValves', 'torque']
-            catDict = {}
+            data = {x:[] for x in categories}
 
-            for stat in categories:
-                try: e1 = str(engine1[stat])
-                except (KeyError): e1 = 'unlisted'
-                try: e2 = str(engine2[stat])
-                except (KeyError): e2 = 'unlisted'
-                catDict[stat] = (e1, e2)
+            for label in categories:
+                stats = []
+                for i in range(0, len(engines)):
+                    engine = engines[i]
+                    try: value = engine[label]
+                    except (KeyError): value = 'unlisted'
+                    stats.append(value)
+                data[label] = stats
+
             underline = "\033[4m"
             noformat = "\033[0m"
             print "{0}Comparsion{1}".format(underline, noformat).center(60)
-            print "{0:20s}{1:20s}{2}".format(" ", "Engine 1", "Engine 2")
-            for label, value in catDict.iteritems():
-                print "{0:20s}{1:20s}{2}".format(label.upper(), value[0], value[1]) 
+
+            header = "{0:20s}".format(" ")
+            for idNum in data['id']:
+                header = header + "{0:20s}".format(str(idNum))
+            print header
+
+            for label, stats in data.iteritems():
+                line = "{0:20s}".format(label.upper())
+                for stat in stats:
+                    line = line + "{0:20s}".format(str(stat))
+                print line
 
         except (RuntimeError, Exception) as e:
             print "Exception when printing engine information"
             print type(e), e
+
 
     def printPackageInfo(self,enginesDict):
         """Prints formatted engine + package information"""
