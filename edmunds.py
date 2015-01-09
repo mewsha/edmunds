@@ -135,42 +135,41 @@ class edmunds(object):
             print type(e), e
 
 
-    def printEnginesSideBySide(self, *packagesDicts):
+    def printEnginesSideBySide(self, **packagesDicts):
         """Prints two engine's information side by side"""
         try:
+            # get each style's engine information
             engines = []
-            for i in range(0,len(packagesDicts)):
-                engine = self.returnStandardEngine(packagesDicts[i])
+            styleIds = packagesDicts.keys()
+            for style in styleIds:  
+                engine = self.returnStandardEngine(packagesDicts[style])
                 if (engine is None):
                     print ("No engine information found for engine "
-                            "{0}").format(i+1)
-                    engine = {'car':'notFound '+i}
+                            "{0}").format(style)
+                    engine = {'style':'notFound '+ style}
+                else:
+                    engine['style'] = style
                 engines.append(engine)
             print engines
 
-            categories = ['id', 'type', 'fuelType', 'configuration',\
+            categories = ['style', 'id', 'type', 'fuelType', 'configuration',\
                 'cylinder', 'size', 'displacement', 'horsepower', \
                 'totalValves', 'torque']
             data = {x:[] for x in categories}
-
+            
+            #Pull out stats which are important for comparison into dict
             for label in categories:
-                stats = []
-                for i in range(0, len(engines)):
-                    engine = engines[i]
+                stats = [] 
+                for engine in engines:
                     try: value = engine[label]
                     except (KeyError): value = 'unlisted'
                     stats.append(value)
                 data[label] = stats
 
+            #print out the stats for all styles, side by side
             underline = "\033[4m"
             noformat = "\033[0m"
             print "{0}Comparsion{1}".format(underline, noformat).center(60)
-
-            header = "{0:20s}".format(" ")
-            for idNum in data['id']:
-                header = header + "{0:20s}".format(str(idNum))
-            print header
-
             for label, stats in data.iteritems():
                 line = "{0:20s}".format(label.upper())
                 for stat in stats:
