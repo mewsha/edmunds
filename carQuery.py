@@ -55,7 +55,7 @@ class carQuery(object):
             jsonData2 = self.handler.getPackageJson(style2id)
             engine1data = self.handler.formatJSON(jsonData1)
             engine2data = self.handler.formatJSON(jsonData2)
-            self.handler.printEnginesSideBySide(engine1data, engine2data)
+            self.handler.printEnginesSideBySide(style1id=engine1data, style2id=engine2data)
         except Exception as e:
             print "An exception occured while comparing engines"
             print type(e), e
