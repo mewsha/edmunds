@@ -3,14 +3,13 @@ import urllib2
 import json
 
 class edmunds(object):
-
+    """Class to query the vehicle api for edmunds"""
 
     protocol = 'https://'
-    resFormat = '?fmt=json'
+    resFormat = 'fmt=json'
     apiKey = '&api_key=7ac6ee6c6jer4xj23warkxzt'
     site = 'api.edmunds.com/api/vehicle/v2/'
     fullsite = protocol + site
-    appendQ = resFormat + apiKey
 
 
     def __init__(self):
@@ -18,14 +17,20 @@ class edmunds(object):
 
     
     def requestInformation(self, query):
-        """query the edmund's website for auto information"""
-        """query should include anything  in the URI which is """
-        """after the site and before the response formatting"""
+        """Query the edmund's website for auto information.
+        The Query should include anything in the URI which is 
+        after the site and before the api key, including the ?
+        and the resFormat, but no prefixed /. 
+        
+        eg. 
+        https://api.edmunds.com/api/vehicle/v2/query?fmt=json&api_key=#
+
+        Returns: json
+        """
         # build URI based on examples on edmunds.com
         jsonInfo = ""
         try:
-            uri = "%s%s%s" % (edmunds.fullsite, query, edmunds.appendQ)
-            print "Getting: %s information" % (query)
+            uri = "%s%s%s" % (edmunds.fullsite, query, edmunds.apiKey)
             response = urllib2.Request(uri)
             carData = urllib2.urlopen(response)
             jsonInfo = carData.read()
@@ -35,34 +40,82 @@ class edmunds(object):
 
 
     def getMakeJson(self, make):
-        """Returns json information about a given manufacturer"""
-        make = str(make).replace(" ", "-")
-        return self.requestInformation(make)
+        """Years and Models of given manufacturer's vehicles
+
+        Returns: json
+        """
+        make = str(make).strip()
+        make = make.replace(" ", "-")
+        query = "{make}?{resFmt}".format(make=make, resFmt=edmunds.resFormat)
+        print("Getting {make} info:").format(make=make)
+        return self.requestInformation(query)
 
 
     def getModelYearJson(self,make,model,year):
-        """Returns json one year's information for a given make, model and year"""
-        make = str(make).replace(" ", "-")
-        model = str(model).replace(" ", "-")
-        year = str(year)
-        query = "%s/%s/%s" % (make, model, year)
+        """
+        Package information for a given make, model and year
+
+        Returns: json
+        """
+        make = str(make).strip()
+        make = make.replace(" ", "-")
+        model = str(model).strip()
+        model = model.replace(" ", "-")
+        year = str(year).strip()
+        query = "{make}/{model}/{year}?{resFmt}".format(make=make,\
+                model=model, year=year, resFmt=edmunds.resFormat)
+        print("Getting {make} {model} {year} info:").format(make=make, \
+                                                           model=model,\
+                                                           year=year)
+        return self.requestInformation(query)
+
+    def getVinDecoded(self,vin):
+        """
+        Decode Vin number into a make, model, style 
+        and other useful information.
+
+        Returns: json
+        """
+        vin = str(vin).strip()
+        vin = vin.replace(" ", "-")
+        #manCode = str(manCode).strip()
+        #manCode = manCode.replace(" ", "-")
+        #query = ("vins/{vin}?manufactureCode={manCode}"
+        #         "&{resFmt}").format(vin=vin, manCode=manCode,\
+        #                             resFmt=edmunds.resFormat)
+        query = ("vins/{vin}?{resFmt}").format(vin=vin,\
+                 resFmt=edmunds.resFormat)
+        
+        #print("Getting {vin} info for {manCode}").format(vin=vin,\
+        #                                                manCode=manCode)
         return self.requestInformation(query)
 
 
     def getPackageJson(self, styleid):
-        """Returns json information for a given style id number"""
-        styleid = str(styleid).replace(" ", "-")
-        query = "styles/%s/engines" % (str(styleid))
+        """
+        Information for a given style id number
+
+        Returns: json
+        """
+        styleid = str(styleid).strip()
+        styleid = styleid.replace(" ", "-")
+        query = "styles/{idNum}/engines?{resFmt}".format(\
+                idNum=styleid, resFmt=edmunds.resFormat)
         return self.requestInformation(query)
 
 
     def printMakeInfo(self, makeDict):
-        """Prints formatted model information"""
+        """
+        Prints formatted model information
+
+        Returns: None
+        """
         idNum = makeDict['id']
         name = makeDict['name']
         models = makeDict['models']
         print "Make ID (%d)" % (idNum)
         print "\t%s has %d model(s)" % (name, len(models))
+        #Extract out the model information and print each
         for model in models:
             name = model['name']
             years = model['years']
@@ -78,6 +131,7 @@ class edmunds(object):
         styles = modelDict['styles']
         print "Model ID (%d)" % (idNum)
         print "\t%d has %d style(s)" % (year,len(styles))
+        #Extract the style information and print each style
         for style in styles:
             sid = style['id']
             name = style['name']
@@ -87,34 +141,40 @@ class edmunds(object):
             print "\t%s %s, %s (%d)" % (trim,modelname,name,sid)
 
 
-    def printEngine(self, engine):
+    def printStandardEngine(self, engine):
+        """Prints information about an engine"""
         categories = ['id', 'code', 'name', 'equipmentType', 'size', \
-            'configuration', 'fuelType', 'horsepower', 'torque', \
-            'totalValves', 'type', 'compressorType', 'cylinder', \
-            'displacement', 'compressionRatio']
-
+                    'configuration', 'fuelType', 'horsepower', \
+                    'torque', 'totalValves', 'type', 'compressorType', \
+                    'cylinder', 'displacement', 'compressionRatio']
+        #Extract out the engine statistics 
         stats = {}
         for stat in categories:
-            try: value = engine[stat]
-            except (KeyError): value = 'undefined'
+            try: 
+                value = engine[stat]
+            except (KeyError, Exception): 
+                value = 'undefined'
             stats[stat] = value
-
-        try: stats['valvCyl'] = stats['totalValves']/stats['cylinder']
-        except (TypeError): stats['valvCyl']='N/A'
-
+        #Calculate the number of valves per cylinder
+        try: 
+            stats['valvCyl'] = stats['totalValves']/stats['cylinder']
+        except (TypeError, Exception): 
+            stats['valvCyl']='N/A'
         print ("({idNum})  STANDARD  {energy}({fuel}) {name}  "
                 "{config}{cyl}  {size}L({disp}kL)").format(\
                 idNum=stats['id'], energy=stats['type'], \
                 fuel=stats['fuelType'], name=stats['name'], \
                 config=stats['configuration'], cyl=stats['cylinder'],\
                 size=stats['size'], disp=stats['displacement'])
-
-        print ("{hp} hp  {valvCyl} valve/cyl  "
-                "{torq} pound/sqinch").format(hp=stats['horsepower'], \
-            valvCyl=stats['valvCyl'], torq=stats['torque'])
+        print ("{hp} hp  {valvCyl} valve/cyl {torq} pound/"
+                "sqinch").format(hp=stats['horsepower'], \
+                valvCyl=stats['valvCyl'], torq=stats['torque'])
+        print ("code: {code}").format(\
+                code=stats['code'])
 
 
     def returnStandardEngine(self,enginesDict):
+        """Extracts the standard engine information from package dict"""
         engines = enginesDict["engines"]
         for engine in engines:
             avail = engine['availability']
@@ -129,7 +189,7 @@ class edmunds(object):
             engine = self.returnStandardEngine(enginesDict)
             if (engine is None):
                 raise RuntimeError("No standard engine for this style")
-            self.printEngine(engine)
+            self.printStandardEngine(engine)
         except (RuntimeError, Exception) as e:
             print "Exception when printing engine information"
             print type(e), e
@@ -150,7 +210,6 @@ class edmunds(object):
                 else:
                     engine['style'] = style
                 engines.append(engine)
-            print engines
 
             categories = ['style', 'id', 'type', 'fuelType', 'configuration',\
                 'cylinder', 'size', 'displacement', 'horsepower', \
@@ -187,7 +246,7 @@ class edmunds(object):
         for engine in engines:
             avail = engine['availability']
             if(avail=="STANDARD"):
-                self.printEngine(engine)
+                self.printStandardEngine(engine)
             else: #availability is OPTIONAL
                 options = engine['options']
                 for o in options:
@@ -204,6 +263,11 @@ class edmunds(object):
                         print "{0}- {1} ".format(a['name'], a['value'])
             print "\n"
     
+
+    def printVinInfo(self, vinDict):
+        """Prints information inside a vin dictionary"""
+        
+
 
     def jsonHook(self,dct):
         """hook to convert json data to dictonary"""
