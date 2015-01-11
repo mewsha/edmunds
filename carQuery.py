@@ -39,6 +39,7 @@ class carQuery(object):
             print type(e), e 
 
     def getEngineInfo(self, styleId):
+        """Print information about this paticular engine"""
         try:
             jsonData = self.handler.getPackageJson(styleId)
             packageInfo = self.handler.formatJSON(jsonData)
@@ -48,6 +49,16 @@ class carQuery(object):
             print type(e), e 
         
 
+    def getVinDecoded(self, vin):
+        """Print decoded vin information"""
+        try:
+            jsonData = self.handler.getVinDecoded(vin, manCode)
+            modelInfo = self.handler.formatJSON(jsonData)
+            self.handler.printVinInfo(modelInfo)
+        except Exception as e:
+            print "An exception occured while getting engine info"
+            print type(e), e 
+        
     def compareEngines(self, style1id, style2id):
         """compares engines for two cars"""
         try:
