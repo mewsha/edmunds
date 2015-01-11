@@ -78,16 +78,10 @@ class edmunds(object):
         """
         vin = str(vin).strip()
         vin = vin.replace(" ", "-")
-        #manCode = str(manCode).strip()
-        #manCode = manCode.replace(" ", "-")
-        #query = ("vins/{vin}?manufactureCode={manCode}"
-        #         "&{resFmt}").format(vin=vin, manCode=manCode,\
-        #                             resFmt=edmunds.resFormat)
         query = ("vins/{vin}?{resFmt}").format(vin=vin,\
                  resFmt=edmunds.resFormat)
         
-        #print("Getting {vin} info for {manCode}").format(vin=vin,\
-        #                                                manCode=manCode)
+        print("Getting {vin} info:").format(vin=vin)
         return self.requestInformation(query)
 
 
