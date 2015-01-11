@@ -52,7 +52,7 @@ class carQuery(object):
     def getVinDecoded(self, vin):
         """Print decoded vin information"""
         try:
-            jsonData = self.handler.getVinDecoded(vin, manCode)
+            jsonData = self.handler.getVinDecoded(vin)
             modelInfo = self.handler.formatJSON(jsonData)
             self.handler.printVinInfo(modelInfo)
         except Exception as e:
