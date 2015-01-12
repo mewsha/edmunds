@@ -84,6 +84,22 @@ class edmunds(object):
         print("Getting {vin} info:").format(vin=vin)
         return self.requestInformation(query)
 
+    def getTMVPrice(self, styleid, condition, mileage, zipcode):
+        """
+        Returns the estimated true market value for a car with it's
+        styleid, condition, number of miles and sale location. 
+
+        Returns: json
+        """
+        styleid = str(styleid).strip()
+        styleid = styleid.replace(" ", "-")
+        condition = str(styleid).strip()
+        styleid = styleid.replace(" ", "-")
+                styleid = str(styleid).strip()
+        styleid = styleid.replace(" ", "-")
+                styleid = str(styleid).strip()
+        styleid = styleid.replace(" ", "-")
+               
 
     def getPackageJson(self, styleid):
         """
@@ -260,8 +276,28 @@ class edmunds(object):
 
     def printVinInfo(self, vinDict):
         """Prints information inside a vin dictionary"""
-        
-
+        try:
+            vin = vinDict['vin']
+            print "Vin: {0}".format(vin)
+            make = vinDict['make']['name']
+            model = vinDict['model']['name']
+            print "{0} {1}".format(make, model)
+            epaClass = vinDict['categories']['EPAClass']
+            market = vinDict['categories']['market']
+            size = vinDict['categories']['vehicleSize']
+            style = vinDict['categories']['vehicleStyle']
+            print " {0} {1}, {2} {3}".format(size, style, market, epaClass)
+            mpg = vinDict["MPG"]
+            print "MPG: city-{0} highway-{1}".format(mpg['city'],mpg['highway'])
+            trans = vinDict["transmission"]['transmissionType']
+            print "Transmission: {0}".format(trans)
+            try:
+                self.printStandardEngine(vinDict['engine'])
+            except (KeyError, Exception):
+                print "No engine information listed."
+        except (Exception) as e:
+            print "An exception occured printing vin information"
+            print type(e), e
 
     def jsonHook(self,dct):
         """hook to convert json data to dictonary"""
