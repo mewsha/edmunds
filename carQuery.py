@@ -56,7 +56,7 @@ class carQuery(object):
             modelInfo = self.handler.formatJSON(jsonData)
             self.handler.printVinInfo(modelInfo)
         except Exception as e:
-            print "An exception occured while getting engine info"
+            print "An exception occured while getting vin info"
             print type(e), e 
         
     def compareEngines(self, style1id, style2id):
@@ -71,4 +71,15 @@ class carQuery(object):
             print "An exception occured while comparing engines"
             print type(e), e
         
+    def getTMVPrice(self, styleid, condition, mileage, zipcode):
+        """compares engines for two cars"""
+        try:
+            jsonData = self.handler.getTMVPrice(style1id, condition, \
+                                                mileage, zipcode)
+            pricedata = self.handler.formatJSON(jsonData1)
+            self.handler.printTMVPrice(pricedata)
+        except Exception as e:
+            print "An exception occured while comparing engines"
+            print type(e), e
+
 
