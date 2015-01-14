@@ -93,13 +93,17 @@ class edmunds(object):
         """
         styleid = str(styleid).strip()
         styleid = styleid.replace(" ", "-")
-        condition = str(styleid).strip()
-        styleid = styleid.replace(" ", "-")
-                styleid = str(styleid).strip()
-        styleid = styleid.replace(" ", "-")
-                styleid = str(styleid).strip()
-        styleid = styleid.replace(" ", "-")
-               
+        condition = str(condition).strip()
+        condition = condtion.replace(" ", "-")
+        mileage = str(mileage).strip()
+        mileage = mileage.replace(" ", "-")
+        zipcode = str(zipcode).strip()
+        zipcode = zipcode.replace(" ", "-")
+        print "TMV has not been implemented yet."
+		print "Proper implementation requires breaking out the "
+		print "getInformation function into one that can query"
+		print "the tmv dataset and the vehicle dataset"
+		print "(right now the vehicle dataset is hard coded)"
 
     def getPackageJson(self, styleid):
         """
